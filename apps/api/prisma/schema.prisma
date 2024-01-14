@@ -10,12 +10,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
+model Users {
+  user_id         Int      @id @default(autoincrement())
+  username        String
+  password        String
+  email           String   @unique
+  referral_number String  @unique
+  points          Int? 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("samples") // if you want to use snake_case format
+  
 }
