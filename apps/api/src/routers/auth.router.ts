@@ -1,4 +1,5 @@
 import {
+  signOut,
   signUpSchema,
   signinUser,
   signupUser,
@@ -10,5 +11,6 @@ const authRouter = Router();
 
 authRouter.post('/signin', signinUser);
 authRouter.post('/signup', inputValidator(signUpSchema), signupUser);
+authRouter.post('/signout', signOut);
 
 export default authRouter;
