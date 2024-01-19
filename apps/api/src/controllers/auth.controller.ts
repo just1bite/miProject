@@ -4,6 +4,7 @@ import { object, string } from 'yup';
 import { genarateToken } from '@/common/helper/jwt.helper';
 import { compare, hash } from '@/common/helper/bcrypt.helper';
 import dayjs from 'dayjs';
+import { generateReferral } from '@/common/helper/referral.helper';
 
 export const signinUser = async (req: Request, res: Response) => {
   try {
@@ -37,7 +38,7 @@ export const signinUser = async (req: Request, res: Response) => {
     return res.status(200).json({
       code: 200,
       message: 'success',
-      data: { user },
+      data: user,
     });
   } catch (error: any) {
     console.log(error);
@@ -48,6 +49,7 @@ export interface signupPayload {
   email: string;
   password: string;
   username: string;
+  referralCode?: string;
 }
 
 export const signUpSchema = object({
@@ -65,24 +67,78 @@ export const signUpSchema = object({
 });
 export const signupUser = async (req: Request, res: Response) => {
   try {
-    const { email, password, username }: signupPayload = {
-      ...req.body,
-      password: hash(req.body.password),
-    };
+    const { email, password, username, referralCode }: signupPayload = req.body;
 
-    const user = await prisma.user.create({
-      data: {
+    const hashedPassword = hash(password);
+
+    const userReferral = generateReferral(username);
+
+    const userWithEmail = await prisma.user.findUnique({
+      where: {
         email,
-        password,
-        username,
-        referral_number: username,
       },
     });
-    return res.status(200).json({
-      code: 200,
-      message: 'success',
-      data: user,
-    });
+    if (userWithEmail) {
+      return res.status(400).json({
+        message: 'Email already exists.',
+      });
+    }
+    if (!referralCode) {
+      const user = await prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          username,
+          referral_number: userReferral,
+        },
+      });
+      return res.status(200).json({
+        code: 200,
+        message: 'success',
+        data: user,
+      });
+    }
+    if (referralCode) {
+      const authorReferral = await prisma.user.findUnique({
+        where: {
+          referral_number: referralCode,
+        },
+      });
+      if (!authorReferral) {
+        return res.status(400).json({
+          message: 'invalid Referral code.',
+        });
+      }
+      const transaction = await prisma.$transaction(async (prisma) => {
+        const createUser = await prisma.user.create({
+          data: {
+            email,
+            password: hashedPassword,
+            username,
+            referral_number: userReferral,
+          },
+        });
+        const point = await prisma.point.create({
+          data: {
+            userUser_id: authorReferral?.user_id,
+            expiredDate: dayjs().add(90, 'day').toDate(),
+          },
+        });
+        const voucher = await prisma.voucher.create({
+          data: {
+            userUser_id: createUser.user_id,
+            expiredDate: dayjs().add(90, 'day').toDate(),
+          },
+        });
+        return {
+          createUser,
+        };
+      });
+      return res.status(200).json({
+        message: 'success',
+        data: transaction.createUser,
+      });
+    }
   } catch (error: any) {
     console.log('@@@ getBranchById error:', error.message || error);
     return res.status(500).json({
