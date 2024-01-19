@@ -33,10 +33,5 @@
     "@types/jsonwebtoken": "^9.0.5",
     "prisma": "^5.7.1",
     "tsconfig-paths": "^4.2.0"
-  },
-  "lint-staged": {
-    "*/.{js,ts,tsx}":[
-      
-    ]
   }
 }
