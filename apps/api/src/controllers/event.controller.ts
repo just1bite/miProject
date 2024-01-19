@@ -1,15 +1,11 @@
 // getAllJSDocTagsasd
 
 export interface eventPayload {
-  id: Int;
-  title: String;
-  eventDescription: String;
-  price: Float;
-  eventDate: DateTime;
-  eventLocation: String;
-  seatCount: Int;
-  email: string;
-  password: string;
-  username: string;
-  referralCode?: string;
+  id: number;
+  title: string;
+  eventDescription: string;
+  price: number;
+  eventDate: Date;
+  eventLocation: string;
+  seatCount: number;
 }
