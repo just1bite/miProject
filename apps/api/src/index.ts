@@ -10,10 +10,12 @@ import express, {
 import cors from 'cors';
 import { PORT } from './config';
 import apiRouter from './common/api.router';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
 app.use(cors());
+app.use(cookieParser());
 app.use(json());
 app.use(
   urlencoded({

@@ -5,6 +5,7 @@ import { genarateToken } from '@/common/helper/jwt.helper';
 import { compare, hash } from '@/common/helper/bcrypt.helper';
 import dayjs from 'dayjs';
 import { generateReferral } from '@/common/helper/referral.helper';
+import cookieParser from 'cookie-parser';
 
 export const signinUser = async (req: Request, res: Response) => {
   try {
@@ -35,6 +36,9 @@ export const signinUser = async (req: Request, res: Response) => {
       httpOnly: true,
       expires: dayjs().add(7, 'day').toDate(),
     });
+
+    console.log(req.cookies);
+
     return res.status(200).json({
       code: 200,
       message: 'success',

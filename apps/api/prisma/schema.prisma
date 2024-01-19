@@ -38,6 +38,19 @@ model Voucher {
   userUser_id Int?
 }
 
+// model Event {
+//   id               Int         @id @default(autoincrement())
+//   title            String
+//   eventDescription String
+//   price            Float
+//   eventDate        DateTime
+//   eventLocation    String
+//   seatCount        Int
+//   PaidEvent        PaidEvent[]
+//   // User             User?       @relation(fields: [userUser_id], references: [user_id])
+//   userUser_id      Int?
+// }
+
 model Event {
   id               Int         @id @default(autoincrement())
   title            String
