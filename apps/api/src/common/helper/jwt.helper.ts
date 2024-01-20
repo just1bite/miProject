@@ -1,7 +1,7 @@
 import { JWT_SECRET } from '@/config';
 import { sign, verify } from 'jsonwebtoken';
 
-export const genarateToken = (user: any) => {
+export const generateToken = (user: any) => {
   const { id, username, email, role } = user;
   return sign(
     {

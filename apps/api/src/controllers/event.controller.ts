@@ -1,10 +1,10 @@
-// getAllJSDocTagsasd
-
 import prisma from '@/prisma';
 import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import { date, number, object, string } from 'yup';
+import { verifyToken } from '@/common/helper/jwt.helper';
+// import { jwtDecode } from 'jwt-decode';
 
 export interface eventPayload {
   title: string;
@@ -80,7 +80,7 @@ export const createEvent = async (req: Request, res: Response) => {
     ) {
       res.status(400).json({
         code: 400,
-        message: 'Event Details Required',
+        message: 'Please enter the required fields.',
       });
     }
 
@@ -98,7 +98,76 @@ export const createEvent = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       code: 200,
-      message: 'ok',
+      message: 'Event Created Successfully',
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const createTicketTier = async (req: Request, res: Response) => {
+  try {
+    const { eventId } = req.params;
+    const token: string = req.cookies['api-token'];
+    const { tierName, discount } = req.body;
+
+    if (!token) {
+      return res.status(401).json({
+        code: 401,
+        message: 'Token not found',
+      });
+    }
+    const verifiedToken = verifyToken(token);
+    if (!verifiedToken.isValid) {
+      return res.status(401).json({
+        code: 401,
+        message: 'Invalid token',
+      });
+    }
+    const { id } = verifiedToken.data;
+    const userWithId = await prisma.user.findUnique({
+      where: {
+        user_id: id,
+      },
+    });
+    if (!userWithId) {
+      return res.status(401).json({
+        code: 401,
+        message: 'Invalid user Id',
+      });
+    }
+    if (!eventId) {
+      return res.status(401).json({
+        code: 401,
+        message: `Event id ${eventId} not found`,
+      });
+    }
+
+    const eventWithId = await prisma.event.findUnique({
+      where: {
+        id: parseInt(eventId),
+      },
+    });
+
+    if (!eventWithId) {
+      return res.status(401).json({
+        code: 401,
+        message: `Event id ${eventWithId} not found`,
+      });
+    }
+
+    const postTicketTier = await prisma.ticketTier.create({
+      data: {
+        tierName,
+        discount,
+        eventId: eventWithId.id,
+      },
+    });
+
+    return res.status(200).json({
+      code: 200,
+      message: 'Ticket tier successfully created',
+      data: postTicketTier,
     });
   } catch (error) {
     console.log(error);

@@ -1,7 +1,7 @@
 import prisma from '@/prisma';
 import { Request, Response } from 'express';
 import { object, string } from 'yup';
-import { genarateToken } from '@/common/helper/jwt.helper';
+import { generateToken } from '@/common/helper/jwt.helper';
 import { compare, hash } from '@/common/helper/bcrypt.helper';
 import dayjs from 'dayjs';
 import { generateReferral } from '@/common/helper/referral.helper';
@@ -25,7 +25,7 @@ export const signinUser = async (req: Request, res: Response) => {
         message: `invalid user or password`,
       });
     }
-    const token = genarateToken({
+    const token = generateToken({
       id: user.user_id,
       email: user.email,
       user: user.username,
